@@ -22,7 +22,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 bot.has_started = False
 
 # ===================================== VARIABLES =====================================
-GUILD_ID = Guild_ID  # Replace with your guild ID
+GUILD_ID = int(os.environ.get("GUILD_ID"))  # Replace with your guild ID
 staff_channel_id = 1054765292674355308  # Your staff channel ID
 accepted_partnership_channel_id = 1420502197434712095 # Channel for the accepted partnerships
 
