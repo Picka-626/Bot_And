@@ -20,9 +20,9 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 bot.has_started = False
 
 # ===================================== VARIABLES =====================================
-GUILD_ID = int(os.environ.get("GUILD_ID"))  # Replace with your guild ID
-staff_channel_id = 1054765292674355308  # Your staff channel ID
-accepted_partnership_channel_id = 1420502197434712095 # Channel for the accepted partnerships
+GUILD_ID = int(os.environ.get("GUILD_ID"))  
+staff_channel_id = 1054765292674355308  # Your staff channel ID (Will be dynamic later)
+accepted_partnership_channel_id = 1420502197434712095 # Channel for the accepted partnerships (Wil be dynamic later)
 
 
 # ====================== Requests ======================
@@ -31,7 +31,7 @@ class Requests(discord.ui.Modal, title="Request Form"):
 
     async def on_submit(self, interaction: discord.Interaction):
         try:
-            # 1. Respond to the interaction ONLY ONCE
+            # 1. Respond to the interaction
             await interaction.response.send_message(
                 f"✅ Request submitted: {self.short_input.value}", 
                 ephemeral=True
@@ -47,7 +47,7 @@ class Requests(discord.ui.Modal, title="Request Form"):
                 )
                 print(f"✅ DM sent to {interaction.user.name}")
             except discord.Forbidden:
-                # Use followup since we already responded
+                # Use followup
                 await interaction.followup.send(
                     "⚠️ I couldn't send you a DM! Please enable DMs from server members.",
                     ephemeral=True
@@ -70,7 +70,7 @@ class Requests(discord.ui.Modal, title="Request Form"):
             
         except Exception as e:
             print("⚠️ Error in modal submission:", e)
-            # If we haven't responded yet, send error message
+            # Error messahe
             if not interaction.response.is_done():
                 await interaction.response.send_message(
                     "❌ An error occurred while processing your request.", 
@@ -82,7 +82,7 @@ class Requests(discord.ui.Modal, title="Request Form"):
 # ====================== STAFF BUTTONS VIEW ======================
 class StaffDecisionView(discord.ui.View):
     def __init__(self, user_id, username, server_link, reason):
-        super().__init__(timeout=None)  # No timeout so buttons work forever
+        super().__init__(timeout=None) 
         self.user_id = user_id
         self.username = username
         self.server_link = server_link
@@ -117,7 +117,7 @@ class StaffDecisionView(discord.ui.View):
         except discord.Forbidden:
             await interaction.followup.send("❌ Could not send DM to user (DMs disabled)", ephemeral=True)
         
-        # Sends a message in the accepted partnership channel
+        # Sends a message in the partnership channel
 
         partnership_channel = interaction.client.get_channel(accepted_partnership_channel_id)
         if partnership_channel:
@@ -132,7 +132,6 @@ class StaffDecisionView(discord.ui.View):
 
     @discord.ui.button(label="❌ Deny", style=discord.ButtonStyle.danger, custom_id="deny_partnership")
     async def deny_button(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # Disable both buttons after click
         for child in self.children:
             child.disabled = True
         
