@@ -12,6 +12,24 @@ import os
 import pytz
 import os
 
+# ===================================== WEB SERVER =====================================
+from flask import Flask
+from threading import Thread
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is alive!"
+
+def run():
+    port = int(os.environ.get("PORT", 8080))  # Render sets $PORT
+    app.run(host="0.0.0.0", port=port)
+
+def keep_alive():
+    t = Thread(target=run)
+    t.start()
+
 # ===================================== BOT SETUP =====================================
 intents = discord.Intents.default()
 intents.message_content = True
@@ -301,5 +319,6 @@ async def on_ready():
 
 
 # ====================== RUN ======================
+keep_alive()
 bot.run(os.getenv("DISCORD_TOKEN"))
 
