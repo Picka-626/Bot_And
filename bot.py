@@ -30,6 +30,63 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
+# ====================== HELPER FUNCTIONS ======================
+def get_staff_channel(guild: discord.Guild):
+    guild_id = str(guild.id)
+    return guild.get_channel(guild_channels.get(guild_id, {}).get("staff"))
+
+def get_partner_channel(guild: discord.Guild):
+    guild_id = str(guild.id)
+    return guild.get_channel(guild_channels.get(guild_id, {}).get("partner"))
+
+# ===================================== CHANNEL SETUPS =====================================
+guild_channels = {}
+
+CONFIG_FILE = "channels.json"
+
+def load_channels():
+    global guild_channels
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as f:
+            guild_channels = json.load(f)
+    else:
+        guild_channels = {}
+
+def save_channels():
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(guild_channels, f, indent=4)
+
+# ====================== SLASH COMMAND TO SET CHANNELS ======================
+@bot.tree.command(name="setchannel", description="Set staff or partner channel")
+@app_commands.describe(channel_type="Which channel to set", channel="Mention the channel")
+async def setchannel(interaction: discord.Interaction, channel_type: str, channel: discord.TextChannel):
+    guild_id = str(interaction.guild.id)
+
+    if channel_type.lower() not in ["staff", "partner"]:
+        await interaction.response.send_message("❌ Choose either `staff` or `partner`.", ephemeral=True)
+        return
+
+    if guild_id not in guild_channels:
+        guild_channels[guild_id] = {}
+
+    guild_channels[guild_id][channel_type.lower()] = channel.id
+    save_channels()
+
+    await interaction.response.send_message(
+        f"✅ {channel_type.capitalize()} channel set to {channel.mention}",
+        ephemeral=True
+    )
+
+# Autocomplete for "staff" and "partner"
+@setchannel.autocomplete("channel_type")
+async def channel_type_autocomplete(interaction: discord.Interaction, current: str):
+    options = ["staff", "partner"]
+    return [
+        app_commands.Choice(name=o, value=o)
+        for o in options if current.lower() in o.lower()
+    ]
+
+
 # ===================================== BOT SETUP =====================================
 intents = discord.Intents.default()
 intents.message_content = True
@@ -39,8 +96,8 @@ bot.has_started = False
 
 # ===================================== VARIABLES =====================================
 GUILD_ID = int(os.environ.get("GUILD_ID"))  
-staff_channel_id = 1054765292674355308  # Your staff channel ID (Will be dynamic later)
-accepted_partnership_channel_id = 1420502197434712095 # Channel for the accepted partnerships (Wil be dynamic later)
+staff_channel_id = get_staff_channel(interaction.guild)  # Your staff channel ID (Will be dynamic later)
+accepted_partnership_channel_id = get_partner_channel(interaction.guild) # Channel for the accepted partnerships (Wil be dynamic later)
 
 # ====================== Requests ======================
 class Requests(discord.ui.Modal, title="Request Form"):
@@ -258,7 +315,6 @@ async def execute_purge_logic(source, amount: int, is_slash: bool):
 
 # ====================== SLASH COMMANDS ======================
 @bot.tree.command(
-    guild=discord.Object(id=GUILD_ID),
     name="request",
     description="Type out a request to the owner or staff team"
 )
@@ -266,7 +322,6 @@ async def request_command(interaction: discord.Interaction):
     await interaction.response.send_modal(Requests())
 
 @bot.tree.command(
-    guild=discord.Object(id=GUILD_ID),
     name="partnerships",
     description="Want to partner with us? Fill in this form."
 )
@@ -280,7 +335,6 @@ async def purge(ctx, amount: int = 100):
     
 @bot.command()
 async def sync(ctx):
-    guild = discord.Object(id=GUILD_ID)
     synced = await bot.tree.sync(guild=guild)
     await ctx.send(f"✅ Synced {len(synced)} command(s) to the guild!")
 
