@@ -273,12 +273,6 @@ async def request_command(interaction: discord.Interaction):
 async def partnerships_command(interaction: discord.Interaction):
     await interaction.response.send_modal(Partnership())
 
-@bot.tree.command(name="purge", description="Purge messages")
-@app_commands.describe(amount="Number to delete (max 100)")
-async def purge_slash(interaction: discord.Interaction, amount: int = 100):
-    await interaction.response.defer()
-    await execute_purge_logic(interaction, amount, is_slash=True)
-
 # ====================== REGULAR COMMANDS ======================
 @bot.command()
 async def purge(ctx, amount: int = 100):
