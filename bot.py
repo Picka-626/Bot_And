@@ -1,9 +1,15 @@
 # ===================================== IMPORTS =====================================
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
+from discord.ui import Button, View, Select
 from discord import app_commands
+import random
+import asyncio
+import aiohttp
+from datetime import datetime
 import json
 import os
+import pytz
 
 # ===================================== WEB SERVER =====================================
 from flask import Flask
@@ -260,11 +266,6 @@ async def request_command(interaction: discord.Interaction):
 async def partnerships_command(interaction: discord.Interaction):
     await interaction.response.send_modal(Partnership())
 
-# ====================== SYNC COMMAND ======================
-@bot.command()
-async def sync(ctx):
-    synced = await bot.tree.sync(guild=ctx.guild)
-    await ctx.send(f"✅ Synced {len(synced)} command(s) to this guild!")
 
 # ====================== ON READY ======================
 @bot.event
