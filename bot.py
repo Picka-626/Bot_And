@@ -85,7 +85,7 @@ def save_db():
         json.dump(staff_roles_db, f, indent=4)
 
 # ====== COMMAND TO ADD STAFF ROLE ======
-@bot.tree.command(name="staff", description="Add a role to the staff roles list")
+@bot.tree.command(name="set_staff", description="Add a role to the staff roles list")
 @app_commands.describe(role="The role to allow command access")
 @commands.has_permissions(administrator=True)
 async def add_staff(interaction: discord.Interaction, role: discord.Role):
