@@ -68,9 +68,63 @@ load_channels()
 
 GUILD_ID = int(os.environ.get("GUILD_ID"))
 
+# ===================================== STAFF ROLE SETUP =====================================
+
+# ====== DATABASE ======
+DB_FILE = "staff_roles.json"
+
+# Load existing data
+if os.path.exists(DB_FILE):
+    with open(DB_FILE, "r") as f:
+        staff_roles_db = json.load(f)
+else:
+    staff_roles_db = {}
+
+def save_db():
+    with open(DB_FILE, "w") as f:
+        json.dump(staff_roles_db, f, indent=4)
+
+# ====== COMMAND TO ADD STAFF ROLE ======
+@bot.tree.command(name="staff", description="Add a role to the staff roles list")
+@app_commands.describe(role="The role to allow command access")
+@commands.has_permissions(administrator=True)
+async def add_staff(interaction: discord.Interaction, role: discord.Role):
+    guild_id = str(interaction.guild.id)
+    
+    if guild_id not in staff_roles_db:
+        staff_roles_db[guild_id] = []
+    
+    if role.id not in staff_roles_db[guild_id]:
+        staff_roles_db[guild_id].append(role.id)
+        save_db()
+        await interaction.response.send_message(f"✅ Added `{role.name}` as a staff role!", ephemeral=True)
+    else:
+        await interaction.response.send_message(f"⚠️ `{role.name}` is already a staff role.", ephemeral=True)
+
+# ====== ROLE CHECK DECORATOR ======
+def is_staff():
+    async def predicate(interaction: discord.Interaction):
+        guild_id = str(interaction.guild.id)
+        if guild_id not in staff_roles_db:
+            return False
+        for role in interaction.user.roles:
+            if role.id in staff_roles_db[guild_id]:
+                return True
+        return False
+    return app_commands.check(predicate)
+
+
+# ====== ERROR HANDLER ======
+@bot.tree.error
+async def on_app_command_error(interaction, error):
+    if isinstance(error, app_commands.CheckFailure):
+        await interaction.response.send_message("❌ You need a staff role to use this command!", ephemeral=True)
+
+
 # ====================== SLASH COMMAND TO SET CHANNELS ======================
 @bot.tree.command(name="setchannel", description="Set staff or partner channel")
 @app_commands.describe(channel_type="Which channel to set", channel="Mention the channel")
+@is_staff()
 async def setchannel(interaction: discord.Interaction, channel_type: str, channel: discord.TextChannel):
     guild_id = str(interaction.guild.id)
 
@@ -131,7 +185,7 @@ class Requests(discord.ui.Modal, title="Request Form"):
             )
         else:
             await interaction.followup.send(
-                "⚠️ Staff channel not set. Please contact staff for this issue.",
+                "⚠️ Staff channel not set. Use `/setchannel staff #channel` first.",
                 ephemeral=True
             )
 
@@ -176,7 +230,7 @@ class StaffDecisionView(discord.ui.View):
             )
         else:
             await interaction.followup.send(
-                "⚠️ Partner channel not set. Please contact staff for this issue.",
+                "⚠️ Partner channel not set. Use `/setchannel partner #channel` first.",
                 ephemeral=True
             )
 
@@ -271,7 +325,7 @@ async def partnerships_command(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
-    await bot.tree.sync()
+    await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"✅ Commands synced to guild {GUILD_ID}")
 
 # ====================== RUN ======================
