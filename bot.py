@@ -12,6 +12,13 @@ import os
 import pytz
 import os
 
+# ===================================== BOT SETUP =====================================
+intents = discord.Intents.default()
+intents.message_content = True
+intents.members = True
+bot = commands.Bot(command_prefix="!", intents=intents)
+bot.has_started = False
+
 # ===================================== WEB SERVER =====================================
 from flask import Flask
 from threading import Thread
@@ -87,15 +94,8 @@ async def channel_type_autocomplete(interaction: discord.Interaction, current: s
     ]
 
 
-# ===================================== BOT SETUP =====================================
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
-bot = commands.Bot(command_prefix="!", intents=intents)
-bot.has_started = False
 
 # ===================================== VARIABLES =====================================
-GUILD_ID = int(os.environ.get("GUILD_ID"))  
 staff_channel_id = get_staff_channel(interaction.guild)  # Your staff channel ID (Will be dynamic later)
 accepted_partnership_channel_id = get_partner_channel(interaction.guild) # Channel for the accepted partnerships (Wil be dynamic later)
 
