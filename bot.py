@@ -271,7 +271,7 @@ async def partnerships_command(interaction: discord.Interaction):
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
-    await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
+    await bot.tree.sync()
     print(f"✅ Commands synced to guild {GUILD_ID}")
 
 # ====================== RUN ======================
