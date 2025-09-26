@@ -324,9 +324,35 @@ async def partnerships_command(interaction: discord.Interaction):
 # ====================== ON READY ======================
 @bot.event
 async def on_ready():
-    print(f"✅ Logged in as {bot.user}")
-    await bot.tree.sync(guild=discord.Object(id=GUILD_ID))
-    print(f"✅ Commands synced to guild {GUILD_ID}")
+    print(f"Logged in as {bot.user}")
+    
+    # Sync commands for all guilds
+    for guild in bot.guilds:
+        await bot.tree.sync()
+        print(f"Commands synced for guild {guild.name} ({guild.id})")
+        
+        # Get channels
+        staff_channel = get_staff_channel(guild)
+        partner_channel = get_partner_channel(guild)
+        
+        # Notify staff channel
+        if staff_channel:
+            try:
+                await staff_channel.send("✅ Bot has started and is now online!")
+            except discord.Forbidden:
+                print(f"⚠️ Cannot send message to staff channel in {guild.name}")
+        else:
+            print(f"⚠️ Staff channel not set for {guild.name}")
+        
+        # Notify partner channel
+        if partner_channel:
+            try:
+                await partner_channel.send("🤝 Bot has started and is monitoring partnerships!")
+            except discord.Forbidden:
+                print(f"⚠️ Cannot send message to partner channel in {guild.name}")
+        else:
+            print(f"⚠️ Partner channel not set for {guild.name}")
+
 
 # ====================== RUN ======================
 keep_alive()
