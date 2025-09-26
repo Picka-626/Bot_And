@@ -131,7 +131,7 @@ class Requests(discord.ui.Modal, title="Request Form"):
             )
         else:
             await interaction.followup.send(
-                "⚠️ Staff channel not set. Use `/setchannel staff #channel` first.",
+                "⚠️ Staff channel not set. Please contact staff for this issue.",
                 ephemeral=True
             )
 
@@ -176,7 +176,7 @@ class StaffDecisionView(discord.ui.View):
             )
         else:
             await interaction.followup.send(
-                "⚠️ Partner channel not set. Use `/setchannel partner #channel` first.",
+                "⚠️ Partner channel not set. Please contact staff for this issue.",
                 ephemeral=True
             )
 
