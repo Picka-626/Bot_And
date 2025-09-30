@@ -254,10 +254,6 @@ async def execute_purge_logic(source, amount: int):
     except Exception as e:
         await source.send(f"❌ Failed to purge messages: {e}", delete_after=10)
 
-@purge_prefix.error
-async def purge_prefix_error(ctx, error):
-    if isinstance(error, commands.CheckFailure):
-        await ctx.send("❌ You need a staff role to use this command.", delete_after=5)
 
 
 
