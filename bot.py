@@ -240,15 +240,16 @@ class Partnership(discord.ui.Modal, title="Partnership Application"):
         else:
             await interaction.followup.send("⚠️ Staff channel not set. Use `/setchannel staff #channel` first.", ephemeral=True)
 
-# ====================== PURGE COMMANDS ======================
+# ====================== PURGE LOGIC ======================
+
 async def execute_purge_logic(source, amount: int):
     if amount > 250:
-        if isinstance(source, commands.Context):
-            await source.send("⚠️ Max 250 messages", delete_after=5)
+        await source.send("⚠️ Max 250 messages", delete_after=5)
         return
+
     deleted = await source.channel.purge(limit=amount + 1)
-    if isinstance(source, commands.Context):
-        await source.send(f"✅ Deleted {len(deleted)} messages", delete_after=5)
+    await source.send(f"✅ Deleted {len(deleted)} messages", delete_after=5)
+
 
 # ====================== HELP COMMANDS ======================
 async def execute_help_logic(source):
@@ -278,8 +279,8 @@ async def help_command(interaction: discord.Interaction):
 
 # ====================== PREFIX COMMANDS ======================
 @bot.command(name="purge")
-@is_staff_prefix()
-async def purge_prefix(ctx: commands.Context, amount: int = 100):
+@is_staff_prefix()  # <- staff-only
+async def purge_prefix(ctx, amount: int = 100):
     await execute_purge_logic(ctx, amount)
 
 # ====================== ON READY ======================
