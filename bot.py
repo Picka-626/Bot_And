@@ -349,7 +349,7 @@ async def partnerships_command(interaction: discord.Interaction):
 async def help_command(interaction: discord.Interaction):
     await execute_help_logic(interaction)
 # ====================== PREFIX COMMANDS ======================
-@bot.command(name=purge)
+@bot.command(name="purge")
 async def purge_prefix(ctx, amount: int = 100):
     await execute_purge_logic(ctx, amount)
 
