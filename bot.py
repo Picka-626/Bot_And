@@ -314,11 +314,11 @@ class Partnership(discord.ui.Modal, title="Partnership Application"):
             )
 # ====================== PURGE COMMANDS ======================
 async def execute_purge_logic(source, amount: int):
-    if amount>100:
-        await respond(source, "Max 100 messages", delete_after = 5)
+    if amount>250:
+        await respond(source, "Max 200 messages", delete_after = 5)
         return
     
-    deleted = await source.channel.purge(limit=amount)
+    deleted = await source.channel.purge(limit=amount+1)
     await respond(source, f"Deleted {len(deleted)} messages", delete_after = 5)
 
 # ====================== HELP COMMANDS ======================
@@ -334,7 +334,7 @@ async def execute_help_logic(source):
     for name, desc in help:
         embed.add_field(name=name, value=desc, inline=True)
 
-    await respond(source, embed=embed) 
+    await source.response.send_message(embed=embed)
 
 # ====================== SLASH COMMANDS ======================
 @bot.tree.command(name="request", description="Send a request to staff")
@@ -349,7 +349,7 @@ async def partnerships_command(interaction: discord.Interaction):
 async def help_command(interaction: discord.Interaction):
     await execute_help_logic(interaction)
 # ====================== PREFIX COMMANDS ======================
-@bot.command(name="purge")
+@bot.command(name=purge)
 async def purge_prefix(ctx, amount: int = 100):
     await execute_purge_logic(ctx, amount)
 
