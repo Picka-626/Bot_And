@@ -324,7 +324,7 @@ async def execute_purge_logic(source, amount: int):
 # ====================== HELP COMMANDS ======================
 async def execute_help_logic(source):
     embed = discord.Embed(title="Help guide", color=0x00ffcc)
-    helps = [
+    help = [
         ("Prefix", f"The current prefix is set to '{prefix}' "),
         ("Prefix commands", "The commands using the prefix are: purge"),
         ("Slash commands", "The commands using slashes are: request, partnership, staff role, set channel"),
