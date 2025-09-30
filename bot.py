@@ -243,12 +243,17 @@ class Partnership(discord.ui.Modal, title="Partnership Application"):
 # ====================== PURGE LOGIC ======================
 
 async def execute_purge_logic(source, amount: int):
-    if amount > 250:
-        await source.send("⚠️ Max 250 messages", delete_after=5)
-        return
+    try:
+        if amount > 250:
+            await source.send("⚠️ Max 250 messages", delete_after=5)
+            return
 
-    deleted = await source.channel.purge(limit=amount + 1)
-    await source.send(f"✅ Deleted {len(deleted)} messages", delete_after=5)
+        deleted = await source.channel.purge(limit=amount + 1)
+        await source.send(f"✅ Deleted {len(deleted)} messages", delete_after=5)
+
+    except Exception as e:
+        await source.send(f"❌ Failed to purge messages: {e}", delete_after=10)
+
 
 
 # ====================== HELP COMMANDS ======================
