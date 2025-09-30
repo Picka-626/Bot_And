@@ -59,10 +59,12 @@ def get_partner_channel(guild: discord.Guild):
     return guild.get_channel(channel_id) if channel_id else None
 
 # ===================================== BOT SETUP =====================================
+prefix = "!!"
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = commands.Bot(command_prefix=prefix, intents=intents)
 bot.has_started = False
 load_channels()
 
@@ -310,6 +312,29 @@ class Partnership(discord.ui.Modal, title="Partnership Application"):
                 "⚠️ Staff channel not set. Use `/setchannel staff #channel` first.",
                 ephemeral=True
             )
+# ====================== PURGE COMMANDS ======================
+async def execute_purge_logic(source, amount: int):
+    if amount>100:
+        await respond(source, "Max 100 messages", delete_after = 5)
+        return
+    
+    deleted = await source.channel.purge(limit=amount)
+    await respond(source, f"Deleted {len(deleted)} messages", delete_after = 5)
+
+# ====================== HELP COMMANDS ======================
+async def execute_help_logic(source):
+    embed = discord.Embed(title="Help guide", color=0x00ffcc)
+    helps = [
+        ("Prefix", f"The current prefix is set to '{prefix}' "),
+        ("Prefix commands", "The commands using the prefix are: purge"),
+        ("Slash commands", "The commands using slashes are: request, partnership, staff role, set channel"),
+        ("Staff commands", "Commands only doable by staff set with the commands: set channel, purge")
+    ]
+
+    for name, desc in help:
+        embed.add_field(name=name, value=desc, inline=True)
+
+    await respond(source, embed=embed) 
 
 # ====================== SLASH COMMANDS ======================
 @bot.tree.command(name="request", description="Send a request to staff")
@@ -320,6 +345,13 @@ async def request_command(interaction: discord.Interaction):
 async def partnerships_command(interaction: discord.Interaction):
     await interaction.response.send_modal(Partnership())
 
+@bot.tree.command(name="help", description="A little guide on all the commands")
+async def help_command(interaction: discord.Interaction):
+    await execute_help_logic(interaction)
+# ====================== PREFIX COMMANDS ======================
+@bot.command(name=purge)
+async def purge_prefix(ctx, amount: int = 100):
+    await execute_purge_logic(ctx, amount)
 
 # ====================== ON READY ======================
 @bot.event
