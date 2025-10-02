@@ -3,6 +3,7 @@ import discord
 from discord.ext import commands, tasks
 from discord.ui import Button, View, Select
 from discord import app_commands
+from datetime import timedelta
 import random
 import asyncio
 import aiohttp
@@ -10,11 +11,11 @@ from datetime import datetime
 import json
 import os
 import pytz
-
-# ===================================== WEB SERVER =====================================
 from flask import Flask
 from threading import Thread
 
+
+# ===================================== WEB SERVER =====================================
 app = Flask(__name__)
 
 @app.route('/')
@@ -254,7 +255,39 @@ async def execute_purge_logic(source, amount: int):
     except Exception as e:
         await source.send(f"❌ Failed to purge messages: {e}", delete_after=10)
 
+# ========= SLASH COMMAND: MUTE =========
+@bot.tree.command(name="mute", description="Timeout a member (mute them) for a set duration")
+@app_commands.describe(member="The member to mute", minutes="How many minutes to mute them", reason="Reason for mute")
+@is_staff()  # <- custom staff role lock
+async def mute(interaction: discord.Interaction, member: discord.Member, minutes: int, reason: str = "No reason provided"):
+    duration = timedelta(minutes=minutes)
+    await member.timeout(duration, reason=reason)
+    await interaction.response.send_message(
+        f"🔇 {member.mention} has been muted for {minutes} minutes.\nReason: {reason}"
+    )
 
+# ========= SLASH COMMAND: UNMUTE =========
+@bot.tree.command(name="unmute", description="Remove timeout (unmute) from a member")
+@app_commands.describe(member="The member to unmute")
+@is_staff()
+async def unmute(interaction: discord.Interaction, member: discord.Member):
+    await member.timeout(None, reason="Unmuted by command")
+    await interaction.response.send_message(f"🔊 {member.mention} has been unmuted.")
+
+# ========= PREFIX COMMAND: MUTE =========
+@bot.command(name="mute")
+@is_staff_prefix()  # <- staff role check for prefix commands
+async def mute_prefix(ctx, member: discord.Member, minutes: int, *, reason: str = "No reason provided"):
+    duration = timedelta(minutes=minutes)
+    await member.timeout(duration, reason=reason)
+    await ctx.send(f"🔇 {member.mention} has been muted for {minutes} minutes.\nReason: {reason}")
+
+# ========= PREFIX COMMAND: UNMUTE =========
+@bot.command(name="unmute")
+@is_staff_prefix()
+async def unmute_prefix(ctx, member: discord.Member):
+    await member.timeout(None, reason="Unmuted by command")
+    await ctx.send(f"🔊 {member.mention} has been unmuted.")
 
 
 
@@ -263,9 +296,9 @@ async def execute_help_logic(source):
     embed = discord.Embed(title="Help guide", color=0x00ffcc)
     helps = [
         ("Prefix", f"The current prefix is set to '{prefix}' "),
-        ("Prefix commands", "The commands using the prefix are: purge"),
-        ("Slash commands", "The commands using slashes are: request, partnership, staff role, set channel"),
-        ("Staff commands", "Commands only doable by staff set with the commands: set channel, purge")
+        ("Prefix commands", "The commands using the prefix are: purge, mute, unmute"),
+        ("Slash commands", "The commands using slashes are: request, partnership, staff role, set channel, mute, unmute"),
+        ("Staff commands", "Commands only doable by staff set with the commands: set channel, purge, mute, unmute")
     ]
     for name, desc in helps:
         embed.add_field(name=name, value=desc, inline=True)
