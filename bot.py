@@ -64,7 +64,7 @@ prefix = "!!"
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-bot = commands.Bot(command_prefix=prefix, intents=intents)
+bot = commands.Bot(command_prefix=prefix, intents=intents, help_command=None)
 bot.has_started = False
 load_channels()
 
