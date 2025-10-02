@@ -300,9 +300,15 @@ async def execute_help_logic(source):
         ("Slash commands", "The commands using slashes are: request, partnership, staff role, set channel, mute, unmute"),
         ("Staff commands", "Commands only doable by staff set with the commands: set channel, purge, mute, unmute")
     ]
+
     for name, desc in helps:
         embed.add_field(name=name, value=desc, inline=True)
-    await source.response.send_message(embed=embed)
+
+    # Detect if it's a slash command or prefix command
+    if isinstance(source, discord.Interaction):
+        await source.response.send_message(embed=embed, ephemeral=True)
+    else:  # prefix command (ctx)
+        await source.send(embed=embed)
 
 # ====================== SLASH COMMANDS ======================
 @bot.tree.command(name="request", description="Send a request to staff")
@@ -318,6 +324,10 @@ async def help_command(interaction: discord.Interaction):
     await execute_help_logic(interaction)
 
 # ====================== PREFIX COMMANDS ======================
+@bot.command(name="help")
+async def help_prefix(ctx):
+    await execute_help_logic(ctx)
+
 @bot.command(name="purge")
 @is_staff_prefix()  # <- staff-only
 async def purge_prefix(ctx, amount: int = 100):
